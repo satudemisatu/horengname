@@ -38,25 +38,18 @@ const speak = (text: string) => {
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
-    
-    // 1. 브라우저가 제공하는 모든 목소리 리스트 가져오기
-    const voices = window.speechSynthesis.getVoices();
-    
-    // 2. 가장 자연스러운 한국어 목소리 순위 매기기
-    // 'Google 한국어' 또는 'Apple Yuna' 같은 목소리가 보통 가장 자연스럽습니다.
-    const preferredVoice = 
-      voices.find(v => v.name.includes('Google') && v.lang === 'ko-KR') || 
-      voices.find(v => v.name.includes('Yuna') && v.lang === 'ko-KR') || 
-      voices.find(v => v.lang === 'ko-KR' || v.lang === 'ko_KR');
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
     utterance.lang = 'ko-KR';
-    utterance.rate = 0.9; // 속도를 아주 살짝 낮추면 훨씬 인간처럼 들립니다.
-    utterance.pitch = 1.0;
     
+    // 기기별로 가장 자연스러운 목소리 자동 탐색 (모바일/PC 공통 최적화)
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = 
+      voices.find(v => v.lang === 'ko-KR' && (v.name.includes('Google') || v.name.includes('Apple'))) ||
+      voices.find(v => v.lang === 'ko-KR');
+
+    if (preferredVoice) utterance.voice = preferredVoice;
+    
+    utterance.rate = 0.95; // 모바일에서도 자연스러운 표준 속도
+    utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
   }
 };
