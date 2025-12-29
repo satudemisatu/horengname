@@ -6,7 +6,7 @@ export default function Home() {
   const [formData, setFormData] = useState({
     fullName: '', 
     gender: 'Male', 
-    nationality: 'USA', 
+    nationality: '', 
     style: 'Trendy', 
     userToken: ''
   });
