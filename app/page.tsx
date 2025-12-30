@@ -31,29 +31,21 @@ export default function Home() {
   const speak = (text: string) => {
     if (typeof window !== 'undefined') {
       window.speechSynthesis.cancel();
-      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ko-KR';
       
       const voices = window.speechSynthesis.getVoices();
       
-      // 환경별 최적의 목소리를 찾기 위한 우선순위 필터링
       const preferredVoice = 
-        // 1순위: 구글의 자연스러운 한국어 (안드로이드, 크롬)
-        voices.find(v => v.lang === 'ko-KR' && v.name.includes('Google')) ||
-        // 2순위: 애플의 자연스러운 한국어 (Siri, Yuna - 아이폰, 맥)
-        voices.find(v => v.lang === 'ko-KR' && (v.name.includes('Siri') || v.name.includes('Premium'))) ||
-        // 3순위: 마이크로소프트의 자연스러운 한국어 (SunHi, InJoon - 윈도우 엣지)
-        voices.find(v => v.lang === 'ko-KR' && v.name.includes('Natural')) ||
-        // 4순위: 기타 시스템 기본 한국어
-        voices.find(v => v.lang === 'ko-KR');
-  
+        voices.find(v => v.lang.includes('ko') && (v.name.includes('Yuna') || v.name.includes('Siri'))) ||
+        voices.find(v => v.lang.includes('ko') && v.name.includes('Google')) ||
+        voices.find(v => v.lang.includes('ko') && v.name.includes('Apple')) ||
+        voices.find(v => v.lang.includes('ko'));
+
       if (preferredVoice) utterance.voice = preferredVoice;
       
-      // 속도가 너무 빠르면 기계음처럼 들리므로, 0.85 ~ 0.95 사이가 가장 '사람' 같습니다.
-      utterance.rate = 0.92; 
-      utterance.pitch = 1.0;
-      
+      utterance.rate = 0.9; 
+      utterance.pitch = 1.05; 
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -109,18 +101,23 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#FFFDF0] text-[#333] pb-20 font-sans text-center">
-      {/* 1. 인스타그램 배너 (높이만 줄이고 문구 전체 복구 + 마크 앞으로) */}
+      {/* 1. 인스타그램 배너 */}
       <div className="bg-[#FF913D] py-3 px-6 border-b-[3px] border-black sticky top-0 z-50 shadow-md">
-        <a href="https://instagram.com/horeng_kr" target="_blank" className="group inline-flex items-center justify-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-          <span className="text-white font-black text-[11px] sm:text-[13px] tracking-tight uppercase">
-            Follow Instagram <span className="text-black italic underline decoration-white decoration-2 underline-offset-4">@horeng_kr</span> for your K-name Keyring & more info
-          </span>
+        <a href="https://instagram.com/horeng_kr" target="_blank" className="flex items-center justify-center gap-3">
+          <svg className="shrink-0" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          
+          <div className="text-left">
+            <div className="text-white font-black text-sm sm:text-base tracking-tight uppercase leading-none">
+              FOLLOW INSTAGRAM <span className="text-black italic underline decoration-white decoration-2 underline-offset-2">@HORENG_KR</span>
+            </div>
+            <div className="text-white font-bold text-[10px] sm:text-[11px] tracking-tight uppercase mt-1 opacity-90">
+              FOR YOUR K-NAME KEYRING & MORE INFO
+            </div>
+          </div>
         </a>
       </div>
 
       <header className="py-10">
-        {/* 호랑이 애니메이션 바운스로 복구 */}
         <div className="animate-bounce leading-none drop-shadow-lg inline-block" style={{ fontSize: '60px' }}>🐯</div>
         <h1 className="text-5xl font-black text-black tracking-tighter italic uppercase mt-4">MY OWN K-NAME</h1>
         <p className="text-gray-400 font-bold text-sm uppercase tracking-[0.2em] mt-3 italic">Discover your destiny in 3 Korean syllables</p>
@@ -154,7 +151,7 @@ export default function Home() {
                 <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-[#F5F5F5] p-3 rounded-2xl font-bold border-2 border-transparent focus:border-[#FF913D] outline-none">
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
-                  <option value="Neutral">Neutral</option>
+                  <option value="Choose not to specify">Choose not to specify</option>
                 </select>
               </div>
               <div>
@@ -176,8 +173,9 @@ export default function Home() {
 
         {results.length > 0 && (
           <div className="space-y-6 pb-20 animate-in fade-in zoom-in duration-500 text-left">
+            {/* 문구 크기 복구 및 줄바꿈 적용 */}
             <p className="text-center font-black text-[#FF913D] animate-pulse uppercase tracking-tighter">
-              📸 Don't forget to capture and share your names!
+              📸 Don't forget to screenshot <br /> and share your Korean Name!
             </p>
             
             {results.map((res, i) => (
